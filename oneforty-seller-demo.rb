@@ -13,7 +13,7 @@ URL_BASE = "dev.oneforty.com"
 RunLater.run_now = true
 
 get '/' do
-  "Hello from the oneforty demo store!"
+  "Hello from the oneforty demo seller!"
 end
 
 # TODO needs to be a post
