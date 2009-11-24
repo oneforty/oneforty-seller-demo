@@ -10,7 +10,7 @@ get '/' do
   "Hello from the oneforty demo store!"
 end
 
-post '/sale_notification' do
+post '/sale-notification' do
   begin
     reference_code = params[:reference_code] # Unique to fulfillment request
     version_code = params[:version_code] # Identifies oneforty sellable version
