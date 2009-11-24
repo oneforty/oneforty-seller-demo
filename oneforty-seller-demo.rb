@@ -1,5 +1,6 @@
 require 'rubygems'
 require 'sinatra'
+require 'vendor/sinatra_run_later/run_later'
 
 get '/' do
   "Hello from the oneforty demo store!"
