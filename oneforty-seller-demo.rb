@@ -17,7 +17,7 @@ get '/' do
 end
 
 # TODO needs to be a post
-get '/sale-notification' do
+get '/sale_notification' do
   begin
     reference_code = params[:reference_code] # Unique to fulfillment request
     version_code = params[:version_code] # Identifies oneforty sellable version
