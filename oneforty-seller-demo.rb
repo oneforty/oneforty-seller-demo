@@ -115,7 +115,7 @@ def do_request(url_base, url_path, params)
   
   http = Net::HTTP.new(url_base, 443)
   http.use_ssl = true
-  #http.enable_post_connection_check = true
+  # http.enable_post_connection_check = true
   http.verify_mode = OpenSSL::SSL::VERIFY_NONE #OpenSSL::SSL::VERIFY_PEER
   store = OpenSSL::X509::Store.new
   store.set_default_paths
