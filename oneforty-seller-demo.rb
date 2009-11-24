@@ -16,6 +16,7 @@ get '/' do
   "Hello from the oneforty demo store!"
 end
 
+# TODO needs to be a post
 get '/sale-notification' do
   begin
     reference_code = params[:reference_code] # Unique to fulfillment request
