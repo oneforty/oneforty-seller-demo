@@ -4,17 +4,25 @@ require 'net/https'
 require 'uri'
 require 'socket'
 require 'openssl'
+require 'vendor/sinatra_run_later/run_later'
 
 get '/' do
   "Hello from the oneforty demo store!"
 end
 
-get '/sale_notification' do
+post '/sale_notification' do
   begin
+    reference_code = params[:reference_code] # Unique to fulfillment request
+    version_code = params[:version_code] # Identifies oneforty sellable version
+    
+    # Process the fulfillment asynchronously.
+    run_later do
+      sleep 3 # Wait long enough for oneforty to receive this request before pinging oneforty to process it.
+      do_successful_fulfillment(reference_code, version_code)
+    end
+    
     status 200 # Tell oneforty that you're ready to process the order!
     "success!"
-  
-    # TODO need to set timeout for do_successful_fulfillment to execute.
   rescue e
     status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
     "failure :-("
@@ -29,7 +37,11 @@ error do
   "Something went wrong. If you have questions about how to use this demo app, please let us know at developers@oneforty.com"
 end
 
-def do_successful_fulfillment
+def do_successful_fulfillment(reference_code, version_code)
+  puts "Processing fulfillment"
+  puts "Reference code: " + reference_code.to_s
+  puts "Version code: " + version_code.to_s
+  
   url_base = "dev.oneforty.com"
   params = {'reference_code'=>'32SDG56GA', 'developer_key'=>'ASFVEBB5362'}
   
