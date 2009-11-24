@@ -6,12 +6,14 @@ require 'socket'
 require 'openssl'
 require 'vendor/sinatra_run_later/run_later'
 
+RunLater.run_now = true
+
 get '/' do
   "Hello from the oneforty demo store!"
 end
 
-post '/sale-notification' do
-  begin
+get '/sale-notification' do
+  # begin
     reference_code = params[:reference_code] # Unique to fulfillment request
     version_code = params[:version_code] # Identifies oneforty sellable version
     
@@ -26,7 +28,7 @@ post '/sale-notification' do
   rescue e
     status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
     "failure :-("
-  end
+  # end
 end
 
 not_found do
