@@ -9,6 +9,8 @@ require 'vendor/sinatra_run_later/run_later'
 
 DEVELOPER_KEY = '962BF0935EDD90E64AAE4260793A4634756B5047'
 URL_BASE = "dev.oneforty.com"
+ROOT_CA = '/etc/ssl/certs'
+
 
 RunLater.run_now = true
 
@@ -129,8 +131,17 @@ def do_request(url_base, url_path, params)
   
   http = Net::HTTP.new(url_base, 443)
   http.use_ssl = true
+  
+  # http://redcorundum.blogspot.com/2008/03/ssl-certificates-and-nethttps.html
+  if File.exist? ROOT_CA
+   http.ca_file = ROOT_CA
+   http.verify_mode = OpenSSL::SSL::VERIFY_PEER
+   http.verify_depth = 5
+  else
+   http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  end
+  
   # http.enable_post_connection_check = true
-  http.verify_mode = OpenSSL::SSL::VERIFY_NONE #OpenSSL::SSL::VERIFY_PEER    
   store = OpenSSL::X509::Store.new 
   store.set_default_paths  
   http.cert_store = store
