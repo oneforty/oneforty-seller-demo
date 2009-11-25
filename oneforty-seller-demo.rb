@@ -38,6 +38,22 @@ get '/sale_notification' do
   end
 end
 
+# TODO needs to be a post
+get '/sale_notification_synchronous' do
+  begin
+    reference_code = params[:reference_code] # Unique to fulfillment request
+    version_code = params[:version_code] # Identifies oneforty sellable version
+    
+    do_successful_fulfillment(reference_code, version_code)
+    
+    status 200 # Tell oneforty that you're ready to process the order!
+    "success!"
+  rescue e
+    status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
+    "failure :-("
+  end
+end
+
 not_found do
   "The page you're looking for is not part of the oneforty seller demo."
 end
