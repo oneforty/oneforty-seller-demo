@@ -32,7 +32,8 @@ post '/sale_notification' do
     
     status 200 # Tell oneforty that you're ready to process the order!
     "success!"
-  rescue e
+  rescue Exception => e
+    puts e.message
     status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
     "failure :-("
   end
@@ -45,10 +46,11 @@ post '/sale_notification_synchronous' do
     version_code = params[:version_code] # Identifies oneforty sellable version
     
     do_successful_fulfillment(reference_code, version_code)
-    
+
     status 200 # Tell oneforty that you're ready to process the order!
     "success!"
-  rescue e
+  rescue Exception => e
+    puts e.message
     status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
     "failure :-("
   end
