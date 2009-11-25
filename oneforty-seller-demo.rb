@@ -18,8 +18,8 @@ get '/' do
   "Hello from the oneforty demo seller!"
 end
 
-# TODO needs to be a post
-get '/sale_notification' do
+# get '/sale_notification' do
+post '/sale_notification' do
   begin
     reference_code = params[:reference_code] # Unique to fulfillment request
     version_code = params[:version_code] # Identifies oneforty sellable version
@@ -38,8 +38,8 @@ get '/sale_notification' do
   end
 end
 
-# TODO needs to be a post
-get '/sale_notification_synchronous' do
+# get '/sale_notification_synchronous' do
+post '/sale_notification_synchronous' do
   begin
     reference_code = params[:reference_code] # Unique to fulfillment request
     version_code = params[:version_code] # Identifies oneforty sellable version
