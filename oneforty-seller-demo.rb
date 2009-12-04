@@ -19,24 +19,24 @@ end
 
 post '/sale_notification' do
   begin
-    reference_code = params[:reference_code] # Unique to fulfillment request
-    version_code = params[:version_code] # Identifies oneforty sellable version
+    reference_code = params[:reference_code]          # Unique to fulfillment request
+    version_code = params[:version_code]              # Identifies oneforty sellable version
     
     do_successful_fulfillment(reference_code, version_code)
 
-    status 200 # Tell oneforty that you're ready to process the order!
+    status 200 
     "success!"
   rescue Exception => e
     puts e.message
-    status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
+    status 500
     "failure :-("
   end
 end
 
 post '/sale_notification_asynchronous' do
   begin
-    reference_code = params[:reference_code] # Unique to fulfillment request
-    version_code = params[:version_code] # Identifies oneforty sellable version
+    reference_code = params[:reference_code]          # Unique to fulfillment request
+    version_code = params[:version_code]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
@@ -91,7 +91,6 @@ def do_successful_fulfillment(reference_code, version_code)
       puts res.body
       puts "DONE!"
       
-      # TODO recieve success in response
       data = JSON.load(res.body)
     else
       puts res.body
