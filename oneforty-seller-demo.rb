@@ -30,7 +30,7 @@ post '/sale_notification' do
   rescue Exception => e
     puts e.message
     status 500
-    "failure :-("
+    "Failure: #{e.to_s}"
   end
 end
 
@@ -50,7 +50,7 @@ post '/sale_notification_asynchronous' do
   rescue Exception => e
     puts e.message
     status 500
-    "failure :-("
+    "Failure: #{e.to_s}"
   end
 end
 
