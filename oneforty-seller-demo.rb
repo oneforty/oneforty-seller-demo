@@ -8,8 +8,9 @@ require 'json'
 require 'vendor/sinatra_run_later/run_later'
 
 DEVELOPER_KEY = '962BF0935EDD90E64AAE4260793A4634756B5047'
-URL_BASE = "sandbox.oneforty.com"
+#URL_BASE = "sandbox.oneforty.com"
 #URL_BASE = "staging.oneforty.com"
+URL_BASE = "dev.oneforty.com"
 ROOT_CA = '/etc/ssl/certs'
 
 RunLater.run_now = true
@@ -21,7 +22,7 @@ end
 post '/sale_notification' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
-    version_code = params[:version_code]              # Identifies oneforty sellable version
+    edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
     do_successful_fulfillment(reference_code, version_code)
 
@@ -37,7 +38,7 @@ end
 post '/sale_notification_asynchronous' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
-    version_code = params[:version_code]              # Identifies oneforty sellable version
+    version_code = params[:edition_code]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
@@ -62,10 +63,10 @@ error do
   "Something went wrong. If you have questions about how to use this demo app, please let us know at developers@oneforty.com"
 end
 
-def do_successful_fulfillment(reference_code, version_code)
+def do_successful_fulfillment(reference_code, edition_code)
   puts "Processing fulfillment"
   puts "Reference code: #{reference_code}"
-  puts "Version code: #{version_code}"
+  puts "Edition code: #{edition_code}"
 
   params = {'reference_code'=>reference_code, 'developer_key'=>DEVELOPER_KEY}
   
