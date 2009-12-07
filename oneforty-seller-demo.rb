@@ -21,9 +21,9 @@ end
 post '/sale_notification' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
-    version_code = params[:version_code]              # Identifies oneforty sellable version
+    edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
-    do_successful_fulfillment(reference_code, version_code)
+    do_successful_fulfillment(reference_code, edition_code)
 
     status 200 
     "success!"
@@ -37,12 +37,12 @@ end
 post '/sale_notification_asynchronous' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
-    version_code = params[:version_code]              # Identifies oneforty sellable version
+    edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
       sleep 3 # Wait long enough for oneforty to receive this request before pinging oneforty to process it.
-      do_successful_fulfillment(reference_code, version_code)
+      do_successful_fulfillment(reference_code, edition_code)
     end
     
     status 200
@@ -62,10 +62,10 @@ error do
   "Something went wrong. If you have questions about how to use this demo app, please let us know at developers@oneforty.com"
 end
 
-def do_successful_fulfillment(reference_code, version_code)
+def do_successful_fulfillment(reference_code, edition_code)
   puts "Processing fulfillment"
   puts "Reference code: #{reference_code}"
-  puts "Version code: #{version_code}"
+  puts "Version code: #{edition_code}"
 
   params = {'reference_code'=>reference_code, 'developer_key'=>DEVELOPER_KEY}
   
