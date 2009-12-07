@@ -8,7 +8,8 @@ require 'json'
 require 'vendor/sinatra_run_later/run_later'
 
 DEVELOPER_KEY = '962BF0935EDD90E64AAE4260793A4634756B5047'
-URL_BASE = "staging.oneforty.com"
+URL_BASE = "sandbox.oneforty.com"
+#URL_BASE = "staging.oneforty.com"
 ROOT_CA = '/etc/ssl/certs'
 
 
