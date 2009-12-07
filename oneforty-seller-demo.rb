@@ -24,7 +24,7 @@ post '/sale_notification' do
     reference_code = params[:reference_code]          # Unique to fulfillment request
     edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
-    do_successful_fulfillment(reference_code, version_code)
+    do_successful_fulfillment(reference_code, edition_code)
 
     status 200 
     "success!"
@@ -38,12 +38,12 @@ end
 post '/sale_notification_asynchronous' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
-    version_code = params[:edition_code]              # Identifies oneforty sellable version
+    edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
       sleep 3 # Wait long enough for oneforty to receive this request before pinging oneforty to process it.
-      do_successful_fulfillment(reference_code, version_code)
+      do_successful_fulfillment(reference_code, edition_code)
     end
     
     status 200
