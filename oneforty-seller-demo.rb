@@ -12,18 +12,32 @@ URL_BASE = "sandbox.oneforty.com"
 #URL_BASE = "staging.oneforty.com"
 ROOT_CA = '/etc/ssl/certs'
 
-
 RunLater.run_now = true
 
 get '/' do
   "Hello from the oneforty demo seller!"
 end
 
-# get '/sale_notification' do
 post '/sale_notification' do
   begin
-    reference_code = params[:reference_code] # Unique to fulfillment request
-    version_code = params[:version_code] # Identifies oneforty sellable version
+    reference_code = params[:reference_code]          # Unique to fulfillment request
+    version_code = params[:version_code]              # Identifies oneforty sellable version
+    
+    do_successful_fulfillment(reference_code, version_code)
+
+    status 200 
+    "success!"
+  rescue Exception => e
+    puts e.message
+    status 500
+    "failure :-("
+  end
+end
+
+post '/sale_notification_asynchronous' do
+  begin
+    reference_code = params[:reference_code]          # Unique to fulfillment request
+    version_code = params[:version_code]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
@@ -31,28 +45,11 @@ post '/sale_notification' do
       do_successful_fulfillment(reference_code, version_code)
     end
     
-    status 200 # Tell oneforty that you're ready to process the order!
+    status 200
     "success!"
   rescue Exception => e
     puts e.message
-    status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
-    "failure :-("
-  end
-end
-
-# get '/sale_notification_synchronous' do
-post '/sale_notification_synchronous' do
-  begin
-    reference_code = params[:reference_code] # Unique to fulfillment request
-    version_code = params[:version_code] # Identifies oneforty sellable version
-    
-    do_successful_fulfillment(reference_code, version_code)
-
-    status 200 # Tell oneforty that you're ready to process the order!
-    "success!"
-  rescue Exception => e
-    puts e.message
-    status 500 # Tell oneforty that something went wrong. We'll keep hitting you every so often until we get a 200.
+    status 500
     "failure :-("
   end
 end
@@ -95,7 +92,6 @@ def do_successful_fulfillment(reference_code, version_code)
       puts res.body
       puts "DONE!"
       
-      # TODO recieve success in response
       data = JSON.load(res.body)
     else
       puts res.body
@@ -115,39 +111,7 @@ def perform_complete(url_base, params)
   return do_request(url_base, "/fulfillment/complete", params)
 end
 
-def do_request(url_base, url_path, params)
-  #######
-  # DO NOT DELETE
-  #######
-  # http = Net::HTTPS.new(url_base, 443)
-  # http.use_ssl = true
-  # http.enable_post_connection_check = true
-  # http.verify_mode = OpenSSL::SSL::VERIFY_PEER
-  # store = OpenSSL::X509::Store.new
-  # store.set_default_paths
-  # http.cert_store = store
-  # http.start {
-  #   res = http.post("fulfillment/acknowledge")
-  #   p res.body
-  # }
-  
-  # socket = TCPSocket.new("dev.oneforty.com", 443) 
-  # ssl_context = OpenSSL::SSL::SSLContext.new() 
-  # 
-  # unless ssl_context.verify_mode
-  #   warn "warning: peer certificate won't be verified this session."
-  #   ssl_context.verify_mode = OpenSSL::SSL::VERIFY_NONE 
-  # end
-  # 
-  # sslsocket = OpenSSL::SSL::SSLSocket.new(socket, ssl_context) 
-  # sslsocket.sync_close = true 
-  # sslsocket.connect 
-  # sslsocket.puts("POST /fulfillment/acknowledge")
-  # 
-  # while line = sslsocket.gets 
-  #   p line
-  # end
-  
+def do_request(url_base, url_path, params)  
   http = Net::HTTP.new(url_base, 443)
   http.use_ssl = true
   
