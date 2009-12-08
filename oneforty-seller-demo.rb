@@ -5,7 +5,11 @@ require 'uri'
 require 'socket'
 require 'openssl'
 require 'json'
+require 'logger'
 require 'vendor/sinatra_run_later/run_later'
+
+# Sinatra config
+set :logging, true
 
 DEVELOPER_KEY = '962BF0935EDD90E64AAE4260793A4634756B5047'
 URL_BASE = "sandbox.oneforty.com"
@@ -15,8 +19,19 @@ ROOT_CA = '/etc/ssl/certs'
 
 RunLater.run_now = true
 
+configure do
+  LOGGER = Logger.new("log/sinatra.log") 
+end
+
+helpers do
+  def logger
+    LOGGER
+  end
+end
+
 get '/' do
   "Hello from the oneforty demo seller!"
+  logger.info("Hello World called")
 end
 
 post '/sale_notification' do
