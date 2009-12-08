@@ -30,8 +30,8 @@ helpers do
 end
 
 get '/' do
-  "Hello from the oneforty demo seller!"
   logger.info("Hello World called")
+  "Hello from the oneforty demo seller!"
 end
 
 post '/sale_notification' do
