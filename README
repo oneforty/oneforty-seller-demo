@@ -1,5 +1,18 @@
-# oneforty-seller-demo
+# oneforty Seller Demo
 
 This is a Sinatra app that simulates the seller-side logic of a sale that takes place on oneforty.com.
+
+Install: 
+
+> gem install json
+> gem install sinatra
+
+Run like:
+
+> ruby oneforty-seller-demo.rb
+
+Confirm it is running by visiting http://localhost:4567/
+
+It should give a hello world message. If not, logs are in log/sinatra.log.
 
 If you have questions about how to incorporate this logic into your web site, please contact us at developers@oneforty.com.

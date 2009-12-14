@@ -11,12 +11,6 @@ require 'vendor/sinatra_run_later/run_later'
 # Sinatra config
 set :logging, true
 
-DEVELOPER_KEY = '962BF0935EDD90E64AAE4260793A4634756B5047'
-URL_BASE = "sandbox.oneforty.com"
-#URL_BASE = "staging.oneforty.com"
-#URL_BASE = "dev.oneforty.com"
-ROOT_CA = '/etc/ssl/certs'
-
 RunLater.run_now = true
 
 configure do
@@ -29,11 +23,25 @@ helpers do
   end
 end
 
+# Hard-coded fake developer key
+DEVELOPER_KEY = 'FAKE_DEV_KEY_1234'
+
+# Base URL for testing
+URL_BASE = "sandbox.oneforty.com"
+#URL_BASE = "dev.oneforty.com"
+
+ROOT_CA = '/etc/ssl/certs'
+
+## Actions
+
+# Used to confirm example app is running
 get '/' do
-  logger.info("Hello World called")
-  "Hello from the oneforty demo seller!"
+  msg = "Hello from the oneforty demo seller!"
+  logger.info(msg)
+  msg
 end
 
+# The standard flow to complete a sale. This is the URL that would be entered on oneforty.
 post '/sale_notification' do
   begin
     reference_code = params[:reference_code]          # Unique to fulfillment request
@@ -78,44 +86,42 @@ error do
   "Something went wrong. If you have questions about how to use this demo app, please let us know at developers@oneforty.com"
 end
 
+# Do the work to process a fulfillment request
 def do_successful_fulfillment(reference_code, edition_code)
-  puts "Processing fulfillment"
-  puts "Reference code: #{reference_code}"
-  puts "Edition code: #{edition_code}"
+  logger.info "Processing fulfillment"
+  logger.info "Reference code: #{reference_code}"
+  logger.info "Edition code: #{edition_code}"
 
-  params = {'reference_code'=>reference_code, 'developer_key'=>DEVELOPER_KEY}
+  params = {'reference_code' => reference_code, 'developer_key' => DEVELOPER_KEY}
   
-  # hit /fulfillment/acknowledge via ssl with dev key and tranasaction #
+  # Hit /fulfillment/acknowledge via SSL with dev key and tranasaction number
+  # to find out who purchased our application
   res = perform_acknowledge(URL_BASE, params)
   
-  if res.kind_of? Net::HTTPSuccess
-    puts res.body
-    puts "OK!"
-    
-    # parse order info in response
-    data = JSON.load(res.body)
-    
-    puts "Reference code: #{data['reference_code']}"
-    puts "Version code: #{data['sellable_version']}"
-    puts "Buyer email: #{data['buyer_email']}"
-    puts "Buyer twitter handle: #{data['buyer_twitter_handle']}"
-    
-    # generate key info
-    complete_params = params.merge({'license_key'=>'FDHERHQDFW'})
-    res = perform_complete(URL_BASE, complete_params)
+  if !res.kind_of? Net::HTTPSuccess
+    logger.error "Error during awknowledge (#{res.code}): #{res.body}"
+    raise Exception.new res.inspect.to_s
+  end
+  
+  # Parse order info in response
+  data = JSON.load(res.body)
+  
+  logger.info "Reference code: #{data['reference_code']}"
+  logger.info "Edition code: #{data['edition_code']}"
+  logger.info "Buyer email: #{data['buyer_email']}"
+  logger.info "Buyer twitter handle: #{data['buyer_twitter_handle']}"
+  
+  # Generate key info -- where app-specific code would go to handle
+  # provisioning this buyer. Include a fake license key for now.
+  complete_params = params.merge({'license_key' => 'FAKE_APP_KEY'})
+  
+  # Now ready to confirm the fulfillment was successful.
+  res = perform_complete(URL_BASE, complete_params)
 
-    if res.kind_of? Net::HTTPSuccess
-      puts res.body
-      puts "DONE!"
-      
-      data = JSON.load(res.body)
-    else
-      puts res.body
-      puts "COMPLETE ERROR (much like freerobby)!"
-    end
+  if res.kind_of? Net::HTTPSuccess
+    data = JSON.load(res.body)
   else
-    puts res.body
-    puts "AWK ERROR!"
+    logger.error "Error during complete: #{res.body}"
   end
 end
 
@@ -127,6 +133,7 @@ def perform_complete(url_base, params)
   return do_request(url_base, "/fulfillment/complete", params)
 end
 
+# Make the actual request over SSL
 def do_request(url_base, url_path, params)  
   http = Net::HTTP.new(url_base, 443)
   http.use_ssl = true
@@ -137,7 +144,8 @@ def do_request(url_base, url_path, params)
    http.verify_mode = OpenSSL::SSL::VERIFY_PEER
    http.verify_depth = 5
   else
-   http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+    logger.error "Failed to find root certificate authority"
+    http.verify_mode = OpenSSL::SSL::VERIFY_NONE
   end
   
   # http.enable_post_connection_check = true
