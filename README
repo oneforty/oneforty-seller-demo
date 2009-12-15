@@ -1,8 +1,9 @@
 # oneforty Seller Demo
 
-This is a Sinatra app that simulates the seller-side logic of a sale that takes place on oneforty.com.
+This is a Sinatra app that simulates the seller-side logic of a sale that takes place on oneforty.com. 
+For more inforation, see http://sandbox.oneforty.com
 
-Install: 
+Install requirements: 
 
 > gem install json
 > gem install sinatra

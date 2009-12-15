@@ -39,7 +39,6 @@ helpers do
   end
 end
 
-
 ## Actions
 
 # Used to confirm example app is running
@@ -116,11 +115,9 @@ def do_successful_fulfillment(reference_code, edition_code)
   # Parse order info in response
   data = JSON.load(res.body)
   
-  logger.info "Reference code: #{data['reference_code']}"
-  logger.info "Edition code: #{data['edition_code']}"
-  logger.info "Buyer email: #{data['buyer_email']}"
-  logger.info "Buyer twitter handle: #{data['buyer_twitter_handle']}"
-  
+  # Includes: reference_code, edition_code, buyer_email, buyer_twitter_handle
+  logger.info "Acknowledge response: #{data.inspect}"
+    
   # Generate key info -- where app-specific code would go to handle
   # provisioning this buyer. Include a fake license key for now.
   complete_params = params.merge({'license_key' => 'FAKE_APP_KEY'})
@@ -130,6 +127,7 @@ def do_successful_fulfillment(reference_code, edition_code)
 
   if res.kind_of? Net::HTTPSuccess
     data = JSON.load(res.body)
+    logger.info "Complete response: #{data.inspect}"
   else
     logger.error "Error during complete: #{res.body}"
   end
