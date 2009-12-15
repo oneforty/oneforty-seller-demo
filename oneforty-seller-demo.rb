@@ -13,8 +13,24 @@ set :logging, true
 
 RunLater.run_now = true
 
-configure do
-  LOGGER = Logger.new("log/sinatra.log") 
+configure do 
+  LOGGER = Logger.new("log/sinatra.log")
+  
+  # Hard-coded fake developer key
+  DEVELOPER_KEY = 'FAKE_DEV_KEY_1234'
+  # Where to find SSL ca
+  ROOT_CA = '/etc/ssl/certs'
+end
+
+configure :production, :development, :staging do
+  # Base URL for testing
+  URL_BASE = "sandbox.oneforty.com"
+end
+
+# Start like: ruby oneforty-seller-demo.rb -e local
+configure :local do
+  # For internal testing
+  URL_BASE = "dev.oneforty.com"
 end
 
 helpers do
@@ -23,20 +39,12 @@ helpers do
   end
 end
 
-# Hard-coded fake developer key
-DEVELOPER_KEY = 'FAKE_DEV_KEY_1234'
-
-# Base URL for testing
-URL_BASE = "sandbox.oneforty.com"
-#URL_BASE = "dev.oneforty.com"
-
-ROOT_CA = '/etc/ssl/certs'
 
 ## Actions
 
 # Used to confirm example app is running
 get '/' do
-  msg = "Hello from the oneforty demo seller!"
+  msg = "Hello from the oneforty example seller app!"
   logger.info(msg)
   msg
 end
@@ -44,6 +52,7 @@ end
 # The standard flow to complete a sale. This is the URL that would be entered on oneforty.
 post '/sale_notification' do
   begin
+    logger.info "Params: #{params.inspect}"
     reference_code = params[:reference_code]          # Unique to fulfillment request
     edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
@@ -60,6 +69,7 @@ end
 
 post '/sale_notification_asynchronous' do
   begin
+    logger.info "Params: #{params.inspect}"
     reference_code = params[:reference_code]          # Unique to fulfillment request
     edition_code = params[:edition_code]              # Identifies oneforty sellable version
     
@@ -134,7 +144,8 @@ def perform_complete(url_base, params)
 end
 
 # Make the actual request over SSL
-def do_request(url_base, url_path, params)  
+def do_request(url_base, url_path, params)
+  logger.info "Base: #{url_base} Path: #{url_path} Params: #{params.inspect}"  
   http = Net::HTTP.new(url_base, 443)
   http.use_ssl = true
   
