@@ -52,8 +52,8 @@ end
 post '/sale_notification' do
   begin
     logger.info "Params: #{params.inspect}"
-    reference_code = params[:reference_code]          # Unique to fulfillment request
-    edition_code = params[:edition_code]              # Identifies oneforty sellable version
+    reference_code = params["reference_code"]          # Unique to fulfillment request
+    edition_code = params["edition_code"]              # Identifies oneforty sellable version
     
     do_successful_fulfillment(reference_code, edition_code)
 
@@ -69,8 +69,8 @@ end
 post '/sale_notification_asynchronous' do
   begin
     logger.info "Params: #{params.inspect}"
-    reference_code = params[:reference_code]          # Unique to fulfillment request
-    edition_code = params[:edition_code]              # Identifies oneforty sellable version
+    reference_code = params["reference_code"]          # Unique to fulfillment request
+    edition_code = params["edition_code"]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
@@ -163,7 +163,8 @@ def do_request(url_base, url_path, params)
   http.cert_store = store
   
   res = http.start {
-    http.post(url_path, params.collect{ |k, v| "#{k}=#{v}" }.join("&"))
+    # http.post(url_path, params.collect{ |k, v| "#{k}=#{v}" }.join("&"))
+    http.post(url_path, params.to_json)
   }
   
   return res
