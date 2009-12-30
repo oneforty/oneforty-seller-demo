@@ -51,9 +51,11 @@ end
 # The standard flow to complete a sale. This is the URL that would be entered on oneforty.
 post '/sale_notification' do
   begin
-    logger.info "Params: #{params.inspect}"
-    reference_code = params["reference_code"]          # Unique to fulfillment request
-    edition_code = params["edition_code"]              # Identifies oneforty sellable version
+    @post_data = JSON.load(request.body.read.to_s)
+    
+    logger.info "Params: #{@post_data.inspect}"
+    reference_code = @post_data["reference_code"]          # Unique to fulfillment request
+    edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
     
     do_successful_fulfillment(reference_code, edition_code)
 
@@ -68,9 +70,11 @@ end
 
 post '/sale_notification_asynchronous' do
   begin
-    logger.info "Params: #{params.inspect}"
-    reference_code = params["reference_code"]          # Unique to fulfillment request
-    edition_code = params["edition_code"]              # Identifies oneforty sellable version
+    @post_data = JSON.load(request.body.read.to_s)
+    
+    logger.info "Params: #{@post_data.inspect}"
+    reference_code = @post_data["reference_code"]          # Unique to fulfillment request
+    edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
     
     # Process the fulfillment asynchronously.
     run_later do
