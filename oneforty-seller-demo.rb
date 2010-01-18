@@ -49,15 +49,22 @@ get '/' do
 end
 
 # The standard flow to complete a sale. This is the URL that would be entered on oneforty.
-post '/sale_notification' do
+post '/notification' do
   begin
     @post_data = JSON.load(request.body.read.to_s)
     
     logger.info "Params: #{@post_data.inspect}"
     reference_code = @post_data["reference_code"]          # Unique to fulfillment request
     edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
+    action = @post_data["action"]                          # What type of notification oneforty has sent
     
-    do_successful_fulfillment(reference_code, edition_code)
+    if action == "fulfillment_notification"
+      do_fulfillment(reference_code, edition_code)
+    elsif action == "fulfillment_void"
+      do_void(reference_code, edition_code)
+    else
+      # TODO unkown action
+    end
 
     status 200 
     "success!"
@@ -68,18 +75,26 @@ post '/sale_notification' do
   end
 end
 
-post '/sale_notification_asynchronous' do
+post '/notification_asynchronous' do
   begin
     @post_data = JSON.load(request.body.read.to_s)
     
     logger.info "Params: #{@post_data.inspect}"
     reference_code = @post_data["reference_code"]          # Unique to fulfillment request
     edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
+    action = @post_data["action"]                          # What type of notification oneforty has sent
     
     # Process the fulfillment asynchronously.
     run_later do
       sleep 3 # Wait long enough for oneforty to receive this request before pinging oneforty to process it.
-      do_successful_fulfillment(reference_code, edition_code)
+      
+      if action == "fulfillment_notification"
+        do_fulfillment(reference_code, edition_code)
+      elsif action == "fulfillment_void"
+        do_void(reference_code, edition_code)
+      else
+        # TODO unkown action
+      end
     end
     
     status 200
@@ -100,7 +115,7 @@ error do
 end
 
 # Do the work to process a fulfillment request
-def do_successful_fulfillment(reference_code, edition_code)
+def do_fulfillment(reference_code, edition_code)
   logger.info "Processing fulfillment"
   logger.info "Reference code: #{reference_code}"
   logger.info "Edition code: #{edition_code}"
@@ -135,6 +150,16 @@ def do_successful_fulfillment(reference_code, edition_code)
   else
     logger.error "Error during complete: #{res.body}"
   end
+end
+
+# Do the work to process a void notification
+def do_void(reference_code, edition_code)
+  logger.info "Processing void"
+  logger.info "Reference code: #{reference_code}"
+  logger.info "Edition code: #{edition_code}"
+
+  # Complete void
+  logger.info "Perform void, cancel account and/or license key."
 end
 
 def perform_acknowledge(url_base, params)
