@@ -54,17 +54,12 @@ post '/notification' do
     @post_data = JSON.load(request.body.read.to_s)
     
     logger.info "Params: #{@post_data.inspect}"
-    reference_code = @post_data["reference_code"]          # Unique to fulfillment request
-    edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
-    action = @post_data["action"]                          # What type of notification oneforty has sent
+    reference_code = @post_data["reference_code"]                             # Unique to fulfillment request
+    edition_code = @post_data["edition_code"]                                 # Identifies oneforty sellable version
+    action = @post_data["action"]                                             # What type of notification oneforty has sent
+    reason = @post_data.has_key?("reason") ? @post_data["reason"] : nil       # Why the subscription was canceled (past_due or manual)
     
-    if action == "fulfillment_notification"
-      do_fulfillment(reference_code, edition_code)
-    elsif action == "fulfillment_void"
-      do_void(reference_code, edition_code)
-    else
-      # TODO unkown action
-    end
+    process_notification(action, reference_code, edition_code, reason)
 
     status 200 
     "success!"
@@ -80,21 +75,16 @@ post '/notification_asynchronous' do
     @post_data = JSON.load(request.body.read.to_s)
     
     logger.info "Params: #{@post_data.inspect}"
-    reference_code = @post_data["reference_code"]          # Unique to fulfillment request
-    edition_code = @post_data["edition_code"]              # Identifies oneforty sellable version
-    action = @post_data["action"]                          # What type of notification oneforty has sent
+    reference_code = @post_data["reference_code"]                             # Unique to fulfillment request
+    edition_code = @post_data["edition_code"]                                 # Identifies oneforty sellable version
+    action = @post_data["action"]                                             # What type of notification oneforty has sent
+    reason = @post_data.has_key?("reason") ? @post_data["reason"] : nil       # Why the subscription was canceled (past_due or manual)
     
     # Process the fulfillment asynchronously.
     run_later do
       sleep 3 # Wait long enough for oneforty to receive this request before pinging oneforty to process it.
       
-      if action == "fulfillment_notification"
-        do_fulfillment(reference_code, edition_code)
-      elsif action == "fulfillment_void"
-        do_void(reference_code, edition_code)
-      else
-        # TODO unkown action
-      end
+      process_notification(action, reference_code, edition_code, reason)
     end
     
     status 200
@@ -112,6 +102,23 @@ end
 
 error do
   "Something went wrong. If you have questions about how to use this demo app, please let us know at developers@oneforty.com"
+end
+
+def process_notification(action, reference_code, edition_code, reason)
+  if action == "fulfillment_notification"
+    do_fulfillment(reference_code, edition_code)
+  elsif action == "fulfillment_void"
+    do_void(reference_code, edition_code)
+  elsif action == "fulfillment_subscription_canceled"
+    reason = @post_data["reason"]                       # Why the subscription was canceled (past_due or manual)
+    do_subscription_canceled(reference_code, edition_code, reason)
+  elsif action == "fulfillment_subscription_past_due"
+    do_subscription_past_due(reference_code, edition_code)
+  elsif action == "fulfillment_subscription_renewal"
+    do_subscription_renewal(reference_code, edition_code)
+  else
+    # TODO unkown action
+  end
 end
 
 # Do the work to process a fulfillment request
@@ -160,6 +167,34 @@ def do_void(reference_code, edition_code)
 
   # Complete void
   logger.info "Perform void, cancel account and/or license key."
+end
+
+def do_subscription_canceled(reference_code, edition_code, reason)
+  logger.info "Processing subscription canceled"
+  logger.info "Reference code: #{reference_code}"
+  logger.info "Edition code: #{edition_code}"
+  logger.info "Reason: #{reason}"
+
+  # Complete Cancel
+  logger.info "Perform cancel subscription for user associated with reference_code"
+end
+
+def do_subscription_past_due(reference_code, edition_code)
+  logger.info "Processing subscription past due"
+  logger.info "Reference code: #{reference_code}"
+  logger.info "Edition code: #{edition_code}"
+
+  # Complete Cancel
+  logger.info "Denote subscription for user associated with reference_code is past due. You will recieve a follow-up on the second attempt where you many need to cancel it."
+end
+
+def do_subscription_renewal(reference_code, edition_code)
+  logger.info "Processing subscription renewed"
+  logger.info "Reference code: #{reference_code}"
+  logger.info "Edition code: #{edition_code}"
+
+  # Complete Cancel
+  logger.info "Potentially record that the subscription for user associated with reference_code was renewed."
 end
 
 def perform_acknowledge(url_base, params)
