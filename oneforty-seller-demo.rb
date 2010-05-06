@@ -110,7 +110,6 @@ def process_notification(action, reference_code, edition_code, reason)
   elsif action == "fulfillment_void"
     do_void(reference_code, edition_code)
   elsif action == "fulfillment_subscription_canceled"
-    reason = @post_data["reason"]                       # Why the subscription was canceled (past_due or manual)
     do_subscription_canceled(reference_code, edition_code, reason)
   elsif action == "fulfillment_subscription_past_due"
     do_subscription_past_due(reference_code, edition_code)
@@ -165,7 +164,7 @@ def do_void(reference_code, edition_code)
   logger.info "Reference code: #{reference_code}"
   logger.info "Edition code: #{edition_code}"
 
-  # Complete void
+  # Complete Void
   logger.info "Perform void, cancel account and/or license key."
 end
 
@@ -184,7 +183,7 @@ def do_subscription_past_due(reference_code, edition_code)
   logger.info "Reference code: #{reference_code}"
   logger.info "Edition code: #{edition_code}"
 
-  # Complete Cancel
+  # Complete Past Due
   logger.info "Denote subscription for user associated with reference_code is past due. You will recieve a follow-up on the second attempt where you many need to cancel it."
 end
 
@@ -193,7 +192,7 @@ def do_subscription_renewal(reference_code, edition_code)
   logger.info "Reference code: #{reference_code}"
   logger.info "Edition code: #{edition_code}"
 
-  # Complete Cancel
+  # Complete Renewal
   logger.info "Potentially record that the subscription for user associated with reference_code was renewed."
 end
 
