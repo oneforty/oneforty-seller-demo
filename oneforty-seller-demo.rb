@@ -22,7 +22,7 @@ configure do
   ROOT_CA = '/etc/ssl/certs'
 end
 
-configure :production, :development, :staging do
+configure :production, :development, :staging, :sandbox do
   # Base URL for testing
   URL_BASE = "sandbox.oneforty.com"
 end
